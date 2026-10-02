@@ -63,6 +63,39 @@ app.delete("/pessoas/:id", async (req, res, next) =>{
     }
 });
 
+app.put("/pessoas/:id", async( req, res, next) => {
+    try{
+        const id = Number(req.params.id);
+
+        if(!Number.isInteger(id)){
+            return res.status(400).json({erro: "ID inválido"})
+        }
+
+        const { nome: nomeBruto, idade} = req.body ?? {};
+        const nome = String(nomeBruto ?? "").trim();
+
+        if(!nome || nome.lentgh > 100) {
+            return res.status(400).json({ erro: "Nome inválido"})
+        }
+        if(!Number.isInteger(idade) || idade < 0 || idade >110 ){
+            return res.status(400).json({erro: "Idade inválida"})
+        }
+
+        const pessoa = await prisma.pessoa.update({
+            where: { id },
+            data: {nome, idade},
+        });
+        res.json(pessoa);
+    } catch (erro) {
+        if (erro.code === "P2025") {
+            return res.status(404).json({ erro: "Pessoa não encontrada" });
+        }
+        next(erro);
+    }
+});
+
+
+
 app.use((erro, req, res, next) => {
     console.error(erro);
     res.status(500).json({erro: "Erro interno do servidor"});

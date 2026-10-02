@@ -52,6 +52,43 @@ export default function App() {
     carregarPessoas();
   }
 
+  const [idEditando, setIdEditando] = useState(null);
+
+async function cadastrar(e) {
+  e.preventDefault();
+  setErro("");
+
+  const editando = idEditando !== null;
+  const url = editando ? `${API}/pessoas/${idEditando}` : `${API}/pessoas`;
+
+  try {
+    const resposta = await fetch(url, {
+      method: editando ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" }, // <-- corrigir o typo aqui também
+      body: JSON.stringify({ nome, idade: Number(idade) }),
+    });
+
+    if (!resposta.ok) {
+      const dados = await resposta.json();
+      setErro(dados.erro || "Erro ao salvar");
+      return;
+    }
+
+    setNome("");
+    setIdade("");
+    setIdEditando(null);
+    carregarPessoas();
+  } catch {
+    setErro("Não foi possível conectar à API. O back-end está rodando?");
+  }
+}
+
+function editar(p) {
+  setNome(p.nome);
+  setIdade(String(p.idade));
+  setIdEditando(p.id);
+}
+
   return(
     <div>
       <h1>Cadastro de Pessoas</h1>
@@ -76,6 +113,7 @@ export default function App() {
           <li key={p.id}>
             {p.nome}, {p.idade} anos{" "}
             <button onClick={() => deletar(p.id)}>Excluir</button>
+            <button onClick={() => editar(p)}>Editar</button>
           </li>
         ))}
       </ul>
