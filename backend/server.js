@@ -18,7 +18,7 @@ const app = express();
 app.use(cors({ origin: FRONTEND_URL}));
 app.use(express.json())
 
-app.get("/pessoa", async (req, res, next) =>{
+app.get("/pessoas", async (req, res, next) =>{
     try{
         const pessoas = await prisma.pessoa.findMany({ orderBy: {id: "asc"}});
         res.json(pessoas);
@@ -27,9 +27,9 @@ app.get("/pessoa", async (req, res, next) =>{
     }
 });
 
-app.post("/pessoa", async (req, res, next) => {
+app.post("/pessoas", async (req, res, next) => {
     try{
-     const { nome: nomeBruto, idade } = req.body;
+     const { nome: nomeBruto, idade } = req.body ??{};
      const nome = String(nomeBruto ?? "").trim();
 
      if(!nome || nome.length > 100 ){
@@ -46,7 +46,7 @@ app.post("/pessoa", async (req, res, next) => {
 });
 
 
-app.delete("/pessoa/:id", async (req, res, next) =>{
+app.delete("/pessoas/:id", async (req, res, next) =>{
     try{
         const id = Number(req.params.id);
 
